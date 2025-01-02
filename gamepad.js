@@ -1,6 +1,8 @@
 // A button list of the current supported gamepads
 const buttonMapping = {
-    "GameCube": {
+    "Switch": {
+        name: "Switch",
+
         A: 0,
         B: 1,
         X: 2,
@@ -18,7 +20,9 @@ const buttonMapping = {
         DPAD_LEFT: 14,
         DPAD_RIGHT: 15
     },
-    "Switch": {
+    "GameCube": {
+        name: "GameCube",
+        
         A: 1,
         B: 2,
         X: 0,
