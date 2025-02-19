@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamepadAPI test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            color: white;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        #lost {
+            text-align: center;
+            font-size: 3vw;
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 50vw;
+            border-radius: 15px;
+            position: absolute;
+            margin-left: 50vw;
+            margin-top: 50vh;
+            transform: translate(-50%, -50%);
+            animation: flash 2s infinite ease;
+        }
+        #gamepads {
+            text-align: center;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            align-items: center;
+        }
+        #connected {
+            width: 100vw;
+        }
+        #connected {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .gamepad {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            margin: 10px;
+            padding: 10px;
+            flex: 1;
+        }
+        .buttonTitle {
+            font-weight: bolder;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes flash {
+            0% { background-color: rgba(255, 255, 255, 0.2); margin-top: 49vh; }
+            50% { background-color: rgba(255, 255, 255, 0.3); margin-top: 51vh; }
+            100% { background-color: rgba(255, 255, 255, 0.2); margin-top: 49vh; }
+        }
+        </style>
+</head>
+<body>
+    <div id="lost">
+        <p>
+            There is no gamepad connected. Please connect a controller via USB or Bluetooth.
+        </p>
+    </div>
+    <div id="gamepads">
+        <div id="connected"></div>
+    </div>
+</body>
+<script>
+    function updateGamepads() {
+        const gamepads = navigator.getGamepads();
+        const connectedDiv = document.getElementById('connected');
+        connectedDiv.innerHTML = '';
+
+        let gamepadCount = 0;
+
+        for (const gamepad of gamepads) {
+            if (gamepad) {
+                gamepadCount++;
+                const gamepadDiv = document.createElement('div');
+                gamepadDiv.className = 'gamepad';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'name';
+                nameDiv.textContent = `Name: ${gamepad.id}`;
+                gamepadDiv.appendChild(nameDiv);
+
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'buttons';
+                const buttonTitleDiv = document.createElement('div');
+                buttonTitleDiv.className = 'buttonTitle';
+                buttonTitleDiv.textContent = 'Buttons';
+                gamepadDiv.appendChild(buttonTitleDiv);
+                gamepadDiv.appendChild(buttonsDiv);
+
+                gamepad.buttons.forEach((button, index) => {
+                    const buttonDiv = document.createElement('div');
+                    buttonDiv.className = 'button';
+                    buttonDiv.textContent = `Button ${index} ${button.pressed ? '[PRESSED]' : ''}`;
+                    buttonDiv.style.color = button.pressed ? 'green' : 'white';
+                    buttonsDiv.appendChild(buttonDiv);
+                });
+
+                const axesDiv = document.createElement('div');
+                axesDiv.className = 'axes';
+                const axesTitleDiv = document.createElement('div');
+                axesTitleDiv.className = 'buttonTitle';
+                axesTitleDiv.textContent = 'Axes';
+                gamepadDiv.appendChild(axesTitleDiv);
+                gamepadDiv.appendChild(axesDiv);
+
+                gamepad.axes.forEach((axis, index) => {
+                    const axisDiv = document.createElement('div');
+                    axisDiv.className = 'axis';
+                    axisDiv.textContent = `Axis ${index} - ${axis}`;
+                    axesDiv.appendChild(axisDiv);
+                });
+
+                connectedDiv.appendChild(gamepadDiv);
+            }
+        }
+
+        document.getElementById('lost').style.display = gamepadCount > 0 ? 'none' : 'block';
+
+        requestAnimationFrame(updateGamepads);
+    }
+
+    window.addEventListener('gamepadconnected', updateGamepads);
+    window.addEventListener('gamepaddisconnected', updateGamepads);
+    updateGamepads();
+</script>
+</html>
