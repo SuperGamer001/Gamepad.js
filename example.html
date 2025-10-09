@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamepad.js Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .event-log {
+            height: 200px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .event-item {
+            padding: 5px;
+            margin: 2px 0;
+            border-left: 3px solid #4CAF50;
+            background: white;
+        }
+        .controller-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status.connected {
+            background-color: #4CAF50;
+        }
+        .status.disconnected {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gamepad.js Example</h1>
+    
+    <div class="section">
+        <h2>Connected Controllers</h2>
+        <div id="controllers">
+            <p><span class="status disconnected"></span>No controllers connected</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Event Log</h2>
+        <div id="eventLog" class="event-log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script src="gamepad.js"></script>
+    <script>
+        const eventLog = document.getElementById('eventLog');
+        const controllersDiv = document.getElementById('controllers');
+        const maxLogEntries = 50;
+
+        function addLogEntry(message, color = '#4CAF50') {
+            const entry = document.createElement('div');
+            entry.className = 'event-item';
+            entry.style.borderLeftColor = color;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            eventLog.insertBefore(entry, eventLog.firstChild);
+            
+            // Keep only the last N entries
+            while (eventLog.children.length > maxLogEntries) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+        }
+
+        function updateControllersList() {
+            if (connected_Gamepads.length === 0 || connected_Gamepads.every(g => !g)) {
+                controllersDiv.innerHTML = '<p><span class="status disconnected"></span>No controllers connected</p>';
+                return;
+            }
+
+            controllersDiv.innerHTML = '';
+            connected_Gamepads.forEach((controller, index) => {
+                if (controller) {
+                    const div = document.createElement('div');
+                    div.className = 'controller-info';
+                    div.innerHTML = `
+                        <p><span class="status connected"></span><strong>Controller ${index}</strong></p>
+                        <p><strong>Type:</strong> ${controller.controllerType}</p>
+                        <p><strong>ID:</strong> ${controller.gamepad.id}</p>
+                    `;
+                    controllersDiv.appendChild(div);
+                }
+            });
+        }
+
+        function clearLog() {
+            eventLog.innerHTML = '';
+        }
+
+        // Listen for controller connection
+        window.addEventListener('controllerConnected', (e) => {
+            addLogEntry(`Controller connected: ${e.detail.controllerType} (${e.detail.id})`, '#2196F3');
+            updateControllersList();
+        });
+
+        // Listen for controller disconnection
+        window.addEventListener('controllerDisconnected', (e) => {
+            addLogEntry(`Controller disconnected: ${e.detail.id}`, '#f44336');
+            updateControllersList();
+        });
+
+        // Listen for controller input
+        window.addEventListener('controllerInput', (e) => {
+            let message = '';
+            
+            if (e.detail.type === 'button') {
+                const action = e.detail.value > 0 ? 'pressed' : 'released';
+                message = `Controller ${e.detail.gamepadIndex}: Button ${e.detail.buttonIndex} ${action}`;
+                
+                if (e.detail.pressure !== null && e.detail.value > 0) {
+                    message += ` (Pressure: ${e.detail.pressure.toFixed(2)})`;
+                }
+                
+                addLogEntry(message, e.detail.value > 0 ? '#4CAF50' : '#9E9E9E');
+            } else if (e.detail.type === 'axis') {
+                message = `Controller ${e.detail.gamepadIndex}: Axis ${e.detail.axisIndex} = ${e.detail.value.toFixed(2)}`;
+                addLogEntry(message, '#FF9800');
+            }
+        });
+
+        // Initial update
+        updateControllersList();
+
+        // Add initial log message
+        addLogEntry('Waiting for gamepad connection...', '#9E9E9E');
+    </script>
+</body>
+</html>
