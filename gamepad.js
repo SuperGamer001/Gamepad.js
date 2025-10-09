@@ -90,7 +90,7 @@ const buttonMapping = {
     },
     "PlayStation": {
         name: "PlayStation",
-        patterns: ["playstation", "dualshock", "dualsense", "ps3", "ps4", "ps5"],
+        patterns: ["playstation", "dualshock", "dualsense", "ps3", "ps4", "ps5", "054c"],
 
         buttons: {
             CROSS: 0,
